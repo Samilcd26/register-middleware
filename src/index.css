@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .input-file{
+    @apply block mt-2 w-full text-sm text-slate-500
+    file:mr-4 file:py-2 file:px-4
+    file:rounded-full file:border-0
+    file:text-sm file:font-semibold
+    file:text-violet-700
+    file:bg-violet-200
+    hover:file:bg-violet-500
+    hover:file:text-white
+  }
+
+  .input-text{
+    @apply mt-1 px-3 py-2 drop-shadow-xl bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500   rounded-full sm:text-sm focus:ring-1
+    transition ease-in-out
+  }
+  .input-title{
+    @apply after:content-['*'] after:ml-0.5 after:text-red-500 block text-sm font-medium text-slate-700 mt-5
+  }
+  .button{
+    @apply mt-2 py-2 text-sm font-semibold text-violet-700 rounded-full bg-violet-200 hover:bg-violet-500 hover:text-white transition ease-in-out
+  }
+  .link{
+    @apply my-4 underline decoration-indigo-500/30 hover:decoration-indigo-500 
+  }
+
+  
+};

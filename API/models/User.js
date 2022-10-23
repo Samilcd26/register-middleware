@@ -1,0 +1,111 @@
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+
+const Schema = mongoose.Schema;
+
+const UserSchema = new Schema({
+  name: {
+    type: String,
+    required: [true, "Please Privaide a name"],
+  },
+  email: {
+    type: String,
+    require: true,
+    unique: true,
+    match: [
+      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+      "Prlease provide a valid email",
+    ],
+  },
+  role: {
+    type: String,
+    default: "user",
+    enum: ["user", "admin"],
+  },
+  password: {
+    type: String,
+    minlength: [6, "Please provider a password with min lenght 6"],
+    require: [true, "Please Proider a passwaord"],
+    select: false,
+  },
+  createAt: {
+    type: Date,
+    default: Date.now,
+  },
+  title: {
+    type: String,
+  },
+  about: {
+    type: String,
+  },
+  place: {
+    type: String,
+  },
+  website: {
+    type: String,
+  },
+  profile_image: {
+    type: String,
+    default: "dafault.jpg",
+  },
+  blocked: {
+    type: Boolean,
+    default: false,
+  },
+  resetPasswordToken: {
+    type: String,
+  },
+  resetPasswordExpires: {
+    type: Date,
+  },
+});
+
+UserSchema.methods.generateJwtFromUser = function () {
+  const { JWT_SECRET_key, JSON_EXPIRE } = process.env;
+
+  const payload = {
+    id: this._id,
+    name: this.name,
+  };
+
+  const token = jwt.sign(payload, JWT_SECRET_key, {
+    expiresIn: JSON_EXPIRE,
+  });
+
+  return token;
+};
+
+UserSchema.methods.getResetPasswordTokenFromUser = function () {
+  const randomHexstring = crypto.randomBytes(15).toString("hex");
+  const { RESET_PASSWORD_EXPIRE } = process.env;
+
+  const resetPasswordToken = crypto
+    .createHash("SHA256")
+    .update(randomHexstring)
+    .digest("hex");
+
+  this.resetPasswordToken = resetPasswordToken;
+  this.resetPasswordExpires = Date.now() + parseInt(RESET_PASSWORD_EXPIRE);
+
+  return resetPasswordToken
+};
+
+UserSchema.pre("save", function (next) {
+  //Parola değişmemişse
+  if (!this.isModified("password")) {
+    next();
+  }
+
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) next(err);
+    bcrypt.hash(this.password, salt, (err, hash) => {
+      if (err) next(err);
+      this.password = hash;
+      next();
+    });
+  });
+});
+
+module.exports = mongoose.model("User", UserSchema);
